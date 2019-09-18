@@ -5,10 +5,12 @@ include("config.php");
 // Make sure the submitted registration values are not empty.
 if (empty($_POST['name']) || empty($_POST['email']) || empty($_POST['password']) || empty($_POST['password_confirmation'])) {
     // One or more values are empty.
+    http_response_code(401);
     die('Please complete the registration form');
 }
 
 if ($_POST['password'] != $_POST['password_confirmation']) {
+    http_response_code(401);
     die('password does not match');
 }
 
@@ -20,6 +22,7 @@ if ($stmt = $db->prepare('SELECT id FROM users WHERE email = ?')) {
     // Store the result so we can check if the account exists in our database.
     if ($stmt->num_rows > 0) {
         // Username already exists
+        http_response_code(401);
         echo 'Email exists, please choose another one !';
     } else {
         if ($stmt = $db->prepare('INSERT INTO users (name, email, password) VALUES (?, ?, ?)')) {
@@ -27,6 +30,7 @@ if ($stmt = $db->prepare('SELECT id FROM users WHERE email = ?')) {
             $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
             $stmt->bind_param('sss', $_POST['name'], $_POST['email'], $password);
             $stmt->execute();
+            http_response_code(200);
             echo 'You have successfully registered, you can now login!! ';
         } else {
 
